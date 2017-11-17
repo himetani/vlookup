@@ -1,5 +1,5 @@
 run:
-	go run main.go
+	./run.sh
 
 help:
 	go run main.go -h
