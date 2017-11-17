@@ -28,35 +28,42 @@ type CLI struct {
 	outStream, errStream io.Writer
 }
 
+const (
+	ExitCodeOk int = iota
+	ExitCodeError
+)
+
 func init() {
 	flags.BoolVar(&printVersion, "version", false, "print version")
 }
 
 func main() {
 	cli := &CLI{outStream: os.Stdout, errStream: os.Stderr}
+
 	os.Exit(cli.Run(os.Args))
 }
 
 func (c *CLI) Run(args []string) int {
 	flags.Usage = func() {
 		fmt.Fprintf(c.errStream, "vlookup version %s\n\n", Version)
-		fmt.Fprintf(c.errStream, "Usage: %s [value](list file) [table](csv file) index_number\n\n", os.Args[0])
+		fmt.Fprintf(c.errStream, "Usage: %s [value](list file) [table](csv file) index_number\n", os.Args[0])
 		flags.PrintDefaults()
 	}
 
 	flags.SetOutput(c.errStream)
 
 	if err := flags.Parse(args[1:]); err == flag.ErrHelp {
-		return 1
+		return ExitCodeOk
 	}
 
 	if printVersion {
 		fmt.Fprintf(c.outStream, "vlookup version %s\n", Version)
-		return 0
+		return ExitCodeOk
 	}
 
 	if len(args) != 4 {
-		return 1
+		fmt.Fprintf(c.errStream, "Arguments number is invalid\n")
+		return ExitCodeError
 	}
 
 	// params
@@ -64,16 +71,18 @@ func (c *CLI) Run(args []string) int {
 	table := args[2]
 	i, err := strconv.Atoi(args[3])
 	if err != nil {
-		return 1
+		fmt.Fprintf(c.errStream, "index_number should be integer value\n")
+		return ExitCodeError
 	}
 
 	// value
 	f, err := os.Open(value)
 	if err != nil {
-		return 1
+		fmt.Fprintf(c.errStream, "value file can't open\n")
+		fmt.Fprintf(c.errStream, "%s\n", err.Error())
+		return ExitCodeError
 	}
 	defer f.Close()
-
 	s := bufio.NewScanner(f)
 	values := []string{}
 	for s.Scan() {
@@ -83,7 +92,9 @@ func (c *CLI) Run(args []string) int {
 	// table
 	f, err = os.Open(table)
 	if err != nil {
-		return 1
+		fmt.Fprintf(c.errStream, "table file can't open\n")
+		fmt.Fprintf(c.errStream, "%s\n", err.Error())
+		return ExitCodeError
 	}
 	defer f.Close()
 
@@ -111,5 +122,5 @@ func (c *CLI) Run(args []string) int {
 
 	fmt.Fprintf(c.outStream, buf.String())
 
-	return 0
+	return ExitCodeOk
 }
