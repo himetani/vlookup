@@ -90,6 +90,10 @@ func (c *CLI) Run(args []string) int {
 	}
 
 	// table
+
+	// min column
+	min := 0
+
 	f, err = os.Open(table)
 	if err != nil {
 		fmt.Fprintf(c.errStream, "table file can't open\n")
@@ -97,15 +101,26 @@ func (c *CLI) Run(args []string) int {
 		return ExitCodeError
 	}
 	defer f.Close()
-
 	s = bufio.NewScanner(f)
 	tables := [][]string{}
 	for s.Scan() {
-		tables = append(tables, strings.Split(s.Text(), ","))
+		row := strings.Split(s.Text(), ",")
+		tables = append(tables, row)
+		if min == 0 {
+			min = len(row)
+		}
+
+		if len(row) < min {
+			min = len(row)
+		}
+	}
+
+	if min < i {
+		fmt.Fprintf(c.errStream, "index_number is invalid\n")
+		return ExitCodeError
 	}
 
 	buf := new(bytes.Buffer)
-
 	for _, v := range values {
 		unmatch := true
 		for _, row := range tables {

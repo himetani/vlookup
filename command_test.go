@@ -20,10 +20,11 @@ func TestCommands(t *testing.T) {
 		status   int
 	}{
 		{"Success", "vlookup,example/value.csv,example/table.csv,1", "111,111\n222,nil\n333,333", stdout, ExitCodeOk},
-		{"Argument", "vlookup,example/value.csv,example/table.csv", "Arguments number is invalid\n", stderr, ExitCodeError},
+		{"Argument", "vlookup,example/value.csv,example/table.csv", "Arguments number is invalid", stderr, ExitCodeError},
 		{"index_number", "vlookup,example/value.csv,example/table.csv,hoge", "index_number should be integer value", stderr, ExitCodeError},
-		{"value", "vlookup,example/hoge.csv,example/table.csv,1", "value file can't open\n", stderr, ExitCodeError},
-		{"table", "vlookup,example/value.csv,example/hoge.csv,1", "table file can't open\n", stderr, ExitCodeError},
+		{"value", "vlookup,example/hoge.csv,example/table.csv,1", "value file can't open", stderr, ExitCodeError},
+		{"table", "vlookup,example/value.csv,example/hoge.csv,1", "table file can't open", stderr, ExitCodeError},
+		{"missing table", "vlookup,example/value.csv,example/missing_table.csv,2", "index_number is invalid", stderr, ExitCodeError},
 	}
 
 	for _, c := range commadtests {
