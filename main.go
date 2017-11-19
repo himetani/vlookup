@@ -34,7 +34,7 @@ const (
 )
 
 func init() {
-	flags.BoolVar(&printVersion, "version", false, "print version")
+	flags.BoolVar(&printVersion, "v", false, "print version")
 }
 
 func main() {
@@ -45,7 +45,6 @@ func main() {
 
 func (c *CLI) Run(args []string) int {
 	flags.Usage = func() {
-		fmt.Fprintf(c.errStream, "vlookup version %s\n\n", Version)
 		fmt.Fprintf(c.errStream, "Usage: %s [value](list file) [table](csv file) index_number\n", os.Args[0])
 		flags.PrintDefaults()
 	}
